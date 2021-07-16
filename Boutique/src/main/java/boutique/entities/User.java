@@ -29,6 +29,12 @@ public class User {
         this.orders = new HashSet<>();
     }
 
+    public User(String name, String surname, String address, String email, String password) {
+        this(name, surname, email, password);
+
+        this.address = address;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Integer getId() {

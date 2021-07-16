@@ -11,6 +11,7 @@ public class RegisterRequest {
     private String name;
     @NotNull
     private String surname;
+    private String address;
     @NotNull
     private String password;
     @NotNull
@@ -39,6 +40,14 @@ public class RegisterRequest {
 
     public void setSurname(String surname) {
         this.surname = surname;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public String getPassword() {

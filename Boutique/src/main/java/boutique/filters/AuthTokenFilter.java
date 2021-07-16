@@ -3,6 +3,7 @@ package boutique.filters;
 import boutique.services.BoutiqueUserDetailsService;
 import boutique.utilities.JwtUtil;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,7 +19,9 @@ import java.io.IOException;
 import org.slf4j.Logger;
 
 public class AuthTokenFilter extends OncePerRequestFilter {
+    @Autowired
     private JwtUtil jwtUtil;
+    @Autowired
     private BoutiqueUserDetailsService userDetailsService;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);

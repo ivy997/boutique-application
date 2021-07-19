@@ -1,35 +1,31 @@
-package boutique.entities;
+package boutique.models;
 
-import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
-
-@Entity
-@Table(name = "products")
-public class Product {
+public class ProductResponse {
     private Integer id;
     private String name;
     private String description;
     private String picture;
     private Double discount;
     private Double price;
-    private Category category;
-    private Set<Order> productOrders;
+    private CategoryResponse category;
 
-    public Product() {}
-
-    public Product(String name, String description, String picture, Double price, Category category) {
+    public ProductResponse(Integer id, String name, String description, String picture,
+                           Double discount, Double price) {
+        this.id = id;
         this.name = name;
         this.description = description;
         this.picture = picture;
+        this.discount = discount;
         this.price = price;
-        this.category = category;
-
-        this.productOrders = new HashSet<>();
     }
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    public ProductResponse(Integer id, String name, String description, String picture,
+                           Double discount, Double price, CategoryResponse category) {
+        this(id, name, description, picture, discount, price);
+
+        this.category = category;
+    }
+
     public Integer getId() {
         return id;
     }
@@ -38,7 +34,6 @@ public class Product {
         this.id = id;
     }
 
-    @Column(name = "name", nullable = false)
     public String getName() {
         return name;
     }
@@ -47,7 +42,6 @@ public class Product {
         this.name = name;
     }
 
-    @Column(name = "description", nullable = false)
     public String getDescription() {
         return description;
     }
@@ -56,7 +50,6 @@ public class Product {
         this.description = description;
     }
 
-    @Column(name = "picture")
     public String getPicture() {
         return picture;
     }
@@ -65,7 +58,6 @@ public class Product {
         this.picture = picture;
     }
 
-    @Column(name = "discount")
     public Double getDiscount() {
         return discount;
     }
@@ -74,7 +66,6 @@ public class Product {
         this.discount = discount;
     }
 
-    @Column(name = "price", nullable = false)
     public Double getPrice() {
         return price;
     }
@@ -83,22 +74,11 @@ public class Product {
         this.price = price;
     }
 
-    @ManyToOne
-    @JoinColumn(name = "categoryId", nullable = false)
-    public Category getCategory() {
+    public CategoryResponse getCategory() {
         return category;
     }
 
-    public void setCategory(Category category) {
+    public void setCategory(CategoryResponse category) {
         this.category = category;
-    }
-
-    @ManyToMany(mappedBy = "products")
-    public Set<Order> getProductOrders() {
-        return productOrders;
-    }
-
-    public void setProductOrders(Set<Order> productOrders) {
-        this.productOrders = productOrders;
     }
 }

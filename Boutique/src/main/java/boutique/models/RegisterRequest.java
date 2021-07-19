@@ -18,6 +18,20 @@ public class RegisterRequest {
     private String confirmPassword;
     private Set<String> role;
 
+    public RegisterRequest(String email, String name, String surname, String password, String confirmPassword) {
+        this.email = email;
+        this.name = name;
+        this.surname = surname;
+        this.password = password;
+        this.confirmPassword = confirmPassword;
+    }
+
+    public RegisterRequest(String email, String name, String surname, String address, String password, String confirmPassword) {
+        this(email, name, surname, password, confirmPassword);
+
+        this.address = address;
+    }
+
     public String getEmail() {
         return email;
     }

@@ -1,46 +1,26 @@
 package boutique.models;
 
-import com.sun.istack.NotNull;
+import boutique.entities.Role;
 
 import java.util.Set;
 
-public class RegisterRequest {
-    @NotNull
-    private String email;
-    @NotNull
+public class UserRequest {
     private String name;
-    @NotNull
     private String surname;
     private String address;
-    @NotNull
+    private String email;
     private String password;
-    @NotNull
     private String confirmPassword;
-    private Set<String> role;
+    private Set<String> roles;
 
-    public RegisterRequest() {
-    }
-
-    public RegisterRequest(String email, String name, String surname, String password, String confirmPassword) {
-        this.email = email;
+    public UserRequest(String name, String surname, String address, String email, String password, String confirmPassword, Set<String> roles) {
         this.name = name;
         this.surname = surname;
+        this.address = address;
+        this.email = email;
         this.password = password;
         this.confirmPassword = confirmPassword;
-    }
-
-    public RegisterRequest(String email, String name, String surname, String address, String password, String confirmPassword) {
-        this(email, name, surname, password, confirmPassword);
-
-        this.address = address;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
+        this.roles = roles;
     }
 
     public String getName() {
@@ -67,6 +47,14 @@ public class RegisterRequest {
         this.address = address;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public String getPassword() {
         return password;
     }
@@ -83,11 +71,11 @@ public class RegisterRequest {
         this.confirmPassword = confirmPassword;
     }
 
-    public Set<String> getRole() {
-        return this.role;
+    public Set<String> getRoles() {
+        return roles;
     }
 
-    public void setRole(Set<String> role) {
-        this.role = role;
+    public void setRoles(Set<String> roles) {
+        this.roles = roles;
     }
 }

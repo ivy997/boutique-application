@@ -13,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,6 +28,33 @@ public class ProductController {
                              CategoryRepository categoryRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<?> listProducts() {
+        try
+        {
+            List<ProductResponse> products = this.productRepository.findAll()
+                    .stream().map(pr -> new ProductResponse(
+                            pr.getId(),
+                            pr.getName(),
+                            pr.getDescription(),
+                            pr.getPicture(),
+                            pr.getDiscount(),
+                            pr.getPrice(),
+                            new CategoryResponse(pr.getCategory().getId(), pr.getCategory().getName()))
+                    ).sorted(Comparator.comparingInt(ProductResponse::getId).reversed()).collect(Collectors.toList());
+
+            return ResponseEntity.ok(products);
+        }
+        catch (Exception ex) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Could not list products.", Arrays.stream(ex
+                            .getStackTrace()).map(x -> x.toString())
+                            .collect(Collectors.joining(", "))));
+
+        }
     }
 
     @GetMapping("/create")

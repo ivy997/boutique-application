@@ -2,7 +2,7 @@ package boutique.models;
 
 import com.sun.istack.NotNull;
 
-public class CreateProductRequest {
+public class ProductRequest {
     @NotNull
     private String name;
     @NotNull

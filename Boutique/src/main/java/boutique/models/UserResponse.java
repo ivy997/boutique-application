@@ -12,12 +12,17 @@ public class UserResponse {
     private String email;
     private Set<RoleResponse> roles;
 
-    public UserResponse(Integer id, String name, String surname, String address, String email, Set<RoleResponse> roles) {
+    public UserResponse(Integer id, String name, String surname, String address, String email) {
         this.id = id;
         this.name = name;
         this.surname = surname;
         this.address = address;
         this.email = email;
+    }
+
+    public UserResponse(Integer id, String name, String surname, String address, String email, Set<RoleResponse> roles) {
+        this(id, name, surname, address, email);
+
         this.roles = roles;
     }
 

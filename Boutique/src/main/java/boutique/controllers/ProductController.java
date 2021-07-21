@@ -2,18 +2,19 @@ package boutique.controllers;
 
 import boutique.entities.Category;
 import boutique.entities.Product;
-import boutique.models.CategoryResponse;
-import boutique.models.ProductRequest;
-import boutique.models.MessageResponse;
-import boutique.models.ProductResponse;
+import boutique.models.*;
 import boutique.repositories.CategoryRepository;
 import boutique.repositories.ProductRepository;
+import boutique.services.ProductService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,37 +24,34 @@ import java.util.stream.Collectors;
 public class ProductController {
     private ProductRepository productRepository;
     private CategoryRepository categoryRepository;
+    private ProductService productService;
 
     public ProductController(ProductRepository productRepository,
-                             CategoryRepository categoryRepository) {
+                             CategoryRepository categoryRepository,
+                             ProductService productService) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
+        this.productService = productService;
     }
 
     @GetMapping("/all")
-    public ResponseEntity<?> listProducts() {
-        try
-        {
-            List<ProductResponse> products = this.productRepository.findAll()
-                    .stream().map(pr -> new ProductResponse(
-                            pr.getId(),
-                            pr.getName(),
-                            pr.getDescription(),
-                            pr.getPicture(),
-                            pr.getDiscount(),
-                            pr.getPrice(),
-                            new CategoryResponse(pr.getCategory().getId(), pr.getCategory().getName()))
-                    ).sorted(Comparator.comparingInt(ProductResponse::getId).reversed()).collect(Collectors.toList());
+    public ResponseEntity<?> listProducts(@RequestBody FilterRequest request) {
+        try {
+            Pageable paging = PageRequest.of(request.getPageIndex() - 1,
+                    request.getElements(),
+                    Sort.by(request.getSortBy()).descending());
 
-            return ResponseEntity.ok(products);
+            Page<Product> pagedResult = this.productService.listProductsWithFilters(request, paging);
+            List<ProductResponse> products = parseProducts(pagedResult);
+
+            return ResponseEntity.ok(new ListElementsResponse(products, pagedResult.getTotalPages()));
         }
         catch (Exception ex) {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Error: Could not list products.", Arrays.stream(ex
+                    .body(new MessageResponse(ex.getMessage(), Arrays.stream(ex
                             .getStackTrace()).map(x -> x.toString())
                             .collect(Collectors.joining(", "))));
-
         }
     }
 
@@ -260,5 +258,24 @@ public class ProductController {
                             .getStackTrace()).map(x -> x.toString())
                             .collect(Collectors.joining(", "))));
         }
+    }
+
+    private List<ProductResponse> parseProducts(Page<Product> pagedResult) throws Exception {
+        if (!pagedResult.hasContent()) {
+            throw new Exception("This page is empty.");
+        }
+
+        List<ProductResponse> products = pagedResult
+                .stream().map(pr -> new ProductResponse(
+                        pr.getId(),
+                        pr.getName(),
+                        pr.getDescription(),
+                        pr.getPicture(),
+                        pr.getDiscount(),
+                        pr.getPrice(),
+                        new CategoryResponse(pr.getCategory().getId(), pr.getCategory().getName()))
+                ).collect(Collectors.toList());
+
+        return products;
     }
 }

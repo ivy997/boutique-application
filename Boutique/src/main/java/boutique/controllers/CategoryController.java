@@ -51,7 +51,6 @@ public class CategoryController {
                     .body(new MessageResponse("Error: Could not list categories.", Arrays.stream(ex
                             .getStackTrace()).map(x -> x.toString())
                             .collect(Collectors.joining(", "))));
-
         }
     }
 

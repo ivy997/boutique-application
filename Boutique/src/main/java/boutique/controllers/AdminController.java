@@ -1,8 +1,13 @@
 package boutique.controllers;
 
+import boutique.entities.User;
 import boutique.models.*;
 import boutique.repositories.RoleRepository;
 import boutique.repositories.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,9 +35,15 @@ public class AdminController {
     }
 
     @GetMapping()
-    public ResponseEntity<?> listUsers() {
+    public ResponseEntity<?> listUsers(@RequestBody PaginationRequest request) {
         try {
-            List<UserResponse> users = this.userRepository.findAll()
+            Pageable paging = PageRequest.of(request.getPageIndex() - 1,
+                    request.getElements(),
+                    Sort.by(request.getSortBy()));
+
+            Page<User> pagedResult = this.userRepository.findAll(paging);
+
+            List<UserResponse> users = pagedResult
                     .stream().map(x -> new UserResponse(
                             x.getId(),
                             x.getName(),

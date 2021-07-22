@@ -6,6 +6,7 @@ import boutique.models.*;
 import boutique.repositories.CategoryRepository;
 import boutique.repositories.ProductRepository;
 import boutique.services.ProductService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -35,8 +36,20 @@ public class ProductController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<?> listProducts(@RequestBody FilterRequest request) {
+    public ResponseEntity<?> listProducts(@RequestParam(required = false) String criteria,
+                                          @RequestParam(required = false, defaultValue = "12") Integer size,
+                                          @RequestParam(required = false) String filter,
+                                          @RequestParam(required = false, defaultValue = "1") Integer page) {
         try {
+            FilterRequest request = null;
+            if (filter == null) {
+                 request = new FilterRequest(size, page, criteria);
+            }
+            else {
+                request = new FilterRequest(size, page,
+                        this.categoryRepository.findByName(StringUtils.capitalize(filter)).getId(), criteria);
+            }
+
             Pageable paging = PageRequest.of(request.getPageIndex() - 1,
                     request.getElements(),
                     Sort.by(request.getSortBy()).descending());

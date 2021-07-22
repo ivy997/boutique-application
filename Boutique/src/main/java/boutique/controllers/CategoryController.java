@@ -1,17 +1,14 @@
 package boutique.controllers;
 
 import boutique.entities.Category;
-import boutique.models.CategoryRequest;
-import boutique.models.CategoryResponse;
-import boutique.models.MessageResponse;
-import boutique.models.ProductResponse;
+import boutique.models.*;
 import boutique.repositories.CategoryRepository;
+import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,9 +24,16 @@ public class CategoryController {
 
     @GetMapping()
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> listCategories() {
+    public ResponseEntity<?> listCategories(@RequestParam(required = false, defaultValue = "12") Integer size,
+                                            @RequestParam(required = false, defaultValue = "1") Integer page) {
         try
         {
+            PaginationRequest request = new PaginationRequest(size, page);
+
+            Pageable paging = PageRequest.of(request.getPageIndex() - 1,
+                    request.getElements(),
+                    Sort.by(request.getSortBy()).descending());
+
             List<CategoryResponse> categories = this.categoryRepository.findAll()
                     .stream().map(x -> new CategoryResponse(
                             x.getId(),
@@ -41,9 +45,11 @@ public class CategoryController {
                                     pr.getPicture(),
                                     pr.getDiscount(),
                                     pr.getPrice())).collect(Collectors.toList())
-                    )).sorted(Comparator.comparingInt(CategoryResponse::getId)).collect(Collectors.toList());
+                    )).collect(Collectors.toList());
 
-            return ResponseEntity.ok(categories);
+            Page<CategoryResponse> pagedResult = new PageImpl<CategoryResponse>(categories);
+
+            return ResponseEntity.ok(new ListElementsResponse(categories, pagedResult.getTotalPages()));
         }
         catch (Exception ex) {
             return ResponseEntity

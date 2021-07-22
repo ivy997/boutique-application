@@ -119,18 +119,30 @@ public class ProfileController {
                                 "Error: Could not find user with id ${id}."));
             }
 
-            if(!userRequest.getPassword().equals(userRequest.getConfirmPassword())) {
-                return ResponseEntity
-                        .badRequest()
-                        .body(new MessageResponse("Error: Passwords do not match!"));
+            User user = this.userRepository.findById(id).get();
+
+            if (userRequest.getPassword() != null) {
+                if(!userRequest.getPassword().equals(userRequest.getConfirmPassword())) {
+                    return ResponseEntity
+                            .badRequest()
+                            .body(new MessageResponse("Error: Passwords do not match!"));
+                }
+
+                user.setPassword(encoder.encode(userRequest.getPassword()));
             }
 
-            User user = this.userRepository.findById(id).get();
-            user.setName(userRequest.getName());
-            user.setSurname(userRequest.getSurname());
-            user.setAddress(userRequest.getAddress());
-            user.setEmail(userRequest.getEmail());
-            user.setPassword(encoder.encode(userRequest.getPassword()));
+            if (userRequest.getName() != null) {
+                user.setName(userRequest.getName());
+            }
+            if (userRequest.getSurname() != null) {
+                user.setSurname(userRequest.getSurname());
+            }
+            if (userRequest.getAddress() != null) {
+                user.setAddress(userRequest.getAddress());
+            }
+            if (userRequest.getEmail() != null) {
+                user.setEmail(userRequest.getEmail());
+            }
 
             Set<Role> roles = new HashSet<>();
             if (userRequest.getRoles() == null) {

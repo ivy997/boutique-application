@@ -5,6 +5,17 @@ public class PaginationRequest {
     private Integer pageIndex = 1;
     private String sortBy = "id";
 
+    public PaginationRequest(Integer elements, Integer pageIndex) {
+        this.elements = elements;
+        this.pageIndex = pageIndex;
+    }
+
+    public PaginationRequest(Integer elements, Integer pageIndex, String sortBy) {
+        this(elements, pageIndex);
+
+        this.sortBy = sortBy;
+    }
+
     public Integer getElements() {
         return elements;
     }

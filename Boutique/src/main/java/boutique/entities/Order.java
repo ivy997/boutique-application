@@ -1,18 +1,18 @@
 package boutique.entities;
 
 import javax.persistence.*;
-import java.util.Set;
+import java.util.List;
 
 @Entity
 @Table(name = "orders")
 public class Order {
     private Integer id;
     private User user;
-    private Set<Product> products;
+    private List<Product> products;
 
     public Order() {}
 
-    public Order(User user, Set<Product> products) {
+    public Order(User user, List<Product> products) {
         this.user = user;
         this.products = products;
     }
@@ -39,11 +39,11 @@ public class Order {
 
     @ManyToMany
     @JoinTable(name = "orders_products")
-    public Set<Product> getProducts() {
+    public List<Product> getProducts() {
         return products;
     }
 
-    public void setProducts(Set<Product> products) {
+    public void setProducts(List<Product> products) {
         this.products = products;
     }
 }

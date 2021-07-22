@@ -4,11 +4,11 @@ import java.util.List;
 
 public class ListElementsResponse {
     private List<?> elements;
-    private Integer totalElementsCount;
+    private Integer totalPagesCount;
 
-    public ListElementsResponse(List<?> elements, Integer totalElementsCount) {
+    public ListElementsResponse(List<?> elements, Integer totalPagesCount) {
         this.elements = elements;
-        this.totalElementsCount = totalElementsCount;
+        this.totalPagesCount = totalPagesCount;
     }
 
     public List<?> getElements() {
@@ -19,11 +19,11 @@ public class ListElementsResponse {
         this.elements = elements;
     }
 
-    public Integer getTotalElementsCount() {
-        return totalElementsCount;
+    public Integer getTotalPagesCount() {
+        return totalPagesCount;
     }
 
-    public void setTotalElementsCount(Integer totalElementsCount) {
-        this.totalElementsCount = totalElementsCount;
+    public void setTotalPagesCount(Integer totalPagesCount) {
+        this.totalPagesCount = totalPagesCount;
     }
 }

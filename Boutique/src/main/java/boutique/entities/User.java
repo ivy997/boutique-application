@@ -14,6 +14,7 @@ public class User {
     private String email;
     private String password;
     private String token;
+    private RefreshToken refreshToken;
     private Set<Role> roles;
     private Set<Order> orders;
 
@@ -98,6 +99,17 @@ public class User {
     @Transient
     public void setToken(String token) {
         this.token = token;
+    }
+
+    @OneToOne(fetch = FetchType.LAZY,
+              cascade =  CascadeType.ALL,
+              mappedBy = "user")
+    public RefreshToken getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(RefreshToken refreshToken) {
+        this.refreshToken = refreshToken;
     }
 
     @ManyToMany(fetch = FetchType.EAGER)

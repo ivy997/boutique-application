@@ -33,8 +33,11 @@ public class OrderController {
 
     @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> listOrders(@RequestBody PaginationRequest request) {
+    public ResponseEntity<?> listOrders(@RequestParam(required = false, defaultValue = "12") Integer size,
+                                        @RequestParam(required = false, defaultValue = "1") Integer page) {
         try {
+            PaginationRequest request = new PaginationRequest(size, page);
+
             Pageable paging = PageRequest.of(request.getPageIndex() - 1,
                     request.getElements(),
                     Sort.by(request.getSortBy()).descending());

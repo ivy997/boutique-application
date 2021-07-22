@@ -1,10 +1,13 @@
 package boutique.controllers;
 
-import boutique.models.CategoryResponse;
-import boutique.models.MessageResponse;
-import boutique.models.ProductResponse;
+import boutique.entities.Product;
+import boutique.models.*;
 import boutique.repositories.CategoryRepository;
 import boutique.repositories.ProductRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,9 +27,18 @@ public class HomeController {
     }
 
     @GetMapping("/")
-    public ResponseEntity<?> index() {
+    public ResponseEntity<?> index(@RequestParam(required = false, defaultValue = "12") Integer size,
+                                   @RequestParam(required = false, defaultValue = "1") Integer page) {
         try {
-            List<ProductResponse> products = this.productRepository.findAll().stream()
+            PaginationRequest request = new PaginationRequest(size, page);
+
+            Pageable paging = PageRequest.of(request.getPageIndex() - 1,
+                    request.getElements(),
+                    Sort.by(request.getSortBy()).descending());
+
+            Page<Product> pagedResult = this.productRepository.findAll(paging);
+
+            List<ProductResponse> products = pagedResult.stream()
                     .map(x -> new ProductResponse(
                             x.getId(),
                             x.getName(),
@@ -35,10 +47,9 @@ public class HomeController {
                             x.getDiscount(),
                             x.getPrice(),
                             new CategoryResponse(x.getCategory().getId(), x.getCategory().getName())
-                    )).sorted(Comparator.comparingInt(ProductResponse::getId).reversed())
-                    .collect(Collectors.toList()).subList(0, 10);
+                    )).collect(Collectors.toList());
 
-            return ResponseEntity.ok(products);
+            return ResponseEntity.ok(new ListElementsResponse(products, pagedResult.getTotalPages()));
         }
         catch (Exception ex) {
             return ResponseEntity

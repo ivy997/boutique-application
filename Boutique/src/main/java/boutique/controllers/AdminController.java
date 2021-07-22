@@ -35,8 +35,11 @@ public class AdminController {
     }
 
     @GetMapping()
-    public ResponseEntity<?> listUsers(@RequestBody PaginationRequest request) {
+    public ResponseEntity<?> listUsers(@RequestParam(required = false, defaultValue = "12") Integer size,
+                                       @RequestParam(required = false, defaultValue = "1") Integer page) {
         try {
+            PaginationRequest request = new PaginationRequest(size, page);
+
             Pageable paging = PageRequest.of(request.getPageIndex() - 1,
                     request.getElements(),
                     Sort.by(request.getSortBy()));
@@ -54,7 +57,7 @@ public class AdminController {
                                     r.getId(), r.getName())).collect(Collectors.toSet())
                     )).collect(Collectors.toList());
 
-            return ResponseEntity.ok(users);
+            return ResponseEntity.ok(new ListElementsResponse(users, pagedResult.getTotalPages()));
         }
         catch (Exception ex) {
             return ResponseEntity

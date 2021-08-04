@@ -43,6 +43,11 @@ public class OrderController {
                     Sort.by(request.getSortBy()).descending());
 
             Page<Order> pagedResult = this.orderRepository.findAll(paging);
+
+            if (!pagedResult.hasContent()) {
+                return ResponseEntity.ok(new MessageResponse("This page is empty."));
+            }
+
             List<OrderResponse> orders = parseOrders(pagedResult);
 
             return ResponseEntity.ok(new ListElementsResponse(orders, pagedResult.getTotalPages()));
@@ -162,11 +167,7 @@ public class OrderController {
         }
     }
 
-    private List<OrderResponse> parseOrders(Page<Order> pagedResult) throws Exception {
-        if (!pagedResult.hasContent()) {
-            throw new Exception("This page is empty.");
-        }
-
+    private List<OrderResponse> parseOrders(Page<Order> pagedResult) {
         List<OrderResponse> orders = pagedResult
                 .stream().map(x -> new OrderResponse(
                         x.getId(),

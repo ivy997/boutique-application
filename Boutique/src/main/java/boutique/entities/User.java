@@ -1,7 +1,9 @@
 package boutique.entities;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -17,6 +19,7 @@ public class User {
     private RefreshToken refreshToken;
     private Set<Role> roles;
     private Set<Order> orders;
+    private Set<Review> reviews;
 
     public User() {}
 
@@ -28,6 +31,7 @@ public class User {
 
         this.roles = new HashSet<>();
         this.orders = new HashSet<>();
+        this.reviews = new HashSet<>();
     }
 
     public User(String name, String surname, String address, String email, String password) {
@@ -129,5 +133,14 @@ public class User {
 
     public void setOrders(Set<Order> orders) {
         this.orders = orders;
+    }
+
+    @OneToMany(mappedBy = "user")
+    public Set<Review> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(Set<Review> reviews) {
+        this.reviews = reviews;
     }
 }

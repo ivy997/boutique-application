@@ -1,5 +1,7 @@
 package boutique.models;
 
+import java.util.List;
+
 public class ProductResponse {
     private Integer id;
     private String name;
@@ -8,6 +10,7 @@ public class ProductResponse {
     private Double discount;
     private Double price;
     private CategoryResponse category;
+    private List<ReviewResponse> reviews;
 
     public ProductResponse(Integer id, String name, String description, String picture,
                            Double discount, Double price) {
@@ -24,6 +27,14 @@ public class ProductResponse {
         this(id, name, description, picture, discount, price);
 
         this.category = category;
+    }
+
+    public ProductResponse(Integer id, String name, String description, String picture,
+                           Double discount, Double price, CategoryResponse category,
+                           List<ReviewResponse> reviews) {
+        this(id, name, description, picture, discount, price, category);
+
+        this.reviews = reviews;
     }
 
     public Integer getId() {
@@ -80,5 +91,13 @@ public class ProductResponse {
 
     public void setCategory(CategoryResponse category) {
         this.category = category;
+    }
+
+    public List<ReviewResponse> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(List<ReviewResponse> reviews) {
+        this.reviews = reviews;
     }
 }

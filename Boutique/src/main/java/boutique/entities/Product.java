@@ -2,6 +2,7 @@ package boutique.entities;
 
 import javax.persistence.*;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -15,6 +16,7 @@ public class Product {
     private Double price;
     private Category category;
     private Set<Order> productOrders;
+    private Set<Review> reviews;
 
     public Product() {}
 
@@ -26,6 +28,7 @@ public class Product {
         this.category = category;
 
         this.productOrders = new HashSet<>();
+        this.reviews = new HashSet<>();
     }
 
     @Id
@@ -100,5 +103,14 @@ public class Product {
 
     public void setProductOrders(Set<Order> productOrders) {
         this.productOrders = productOrders;
+    }
+
+    @OneToMany(mappedBy = "product")
+    public Set<Review> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(Set<Review> reviews) {
+        this.reviews = reviews;
     }
 }

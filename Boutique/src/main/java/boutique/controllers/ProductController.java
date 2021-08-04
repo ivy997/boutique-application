@@ -2,10 +2,13 @@ package boutique.controllers;
 
 import boutique.entities.Category;
 import boutique.entities.Product;
+import boutique.entities.Review;
 import boutique.models.*;
 import boutique.repositories.CategoryRepository;
 import boutique.repositories.ProductRepository;
+import boutique.repositories.ReviewRepository;
 import boutique.services.ProductService;
+import boutique.services.ReviewService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,14 +28,20 @@ import java.util.stream.Collectors;
 public class ProductController {
     private ProductRepository productRepository;
     private CategoryRepository categoryRepository;
+    private ReviewRepository reviewRepository;
     private ProductService productService;
+    private ReviewService reviewService;
 
     public ProductController(ProductRepository productRepository,
                              CategoryRepository categoryRepository,
-                             ProductService productService) {
+                             ReviewRepository reviewRepository,
+                             ProductService productService,
+                             ReviewService reviewService) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
+        this.reviewRepository = reviewRepository;
         this.productService = productService;
+        this.reviewService = reviewService;
     }
 
     @GetMapping("/all")
@@ -42,7 +51,7 @@ public class ProductController {
                                           @RequestParam(required = false, defaultValue = "1") Integer page) {
         try {
             FilterRequest request = null;
-            if (filter == null) {
+            if (filter == null || filter.isEmpty()) {
                  request = new FilterRequest(size, page, criteria);
             }
             else {
@@ -55,6 +64,11 @@ public class ProductController {
                     Sort.by(request.getSortBy()).descending());
 
             Page<Product> pagedResult = this.productService.listProductsWithFilters(request, paging);
+
+            if (!pagedResult.hasContent()) {
+                return ResponseEntity.ok(new MessageResponse("No products have been found."));
+            }
+
             List<ProductResponse> products = parseProducts(pagedResult);
 
             return ResponseEntity.ok(new ListElementsResponse(products, pagedResult.getTotalPages()));
@@ -119,7 +133,9 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> details(@PathVariable Integer id) {
+    public ResponseEntity<?> details(@PathVariable Integer id,
+                                     @RequestParam(required = false, defaultValue = "12") Integer size,
+                                     @RequestParam(required = false, defaultValue = "1") Integer page) {
         try {
             if (!this.productRepository.existsById(id)) {
                 return ResponseEntity
@@ -128,7 +144,19 @@ public class ProductController {
                                 "Error: Could not find product with id ${id}."));
             }
 
+            PaginationRequest request = new PaginationRequest(size, page);
+
+            Pageable paging = PageRequest.of(request.getPageIndex() - 1,
+                    request.getElements(),
+                    Sort.by(request.getSortBy()).descending());
+
             Product product = this.productRepository.findById(id).get();
+
+            Page<Review> pagedResult = this.reviewRepository
+                    .findAllByProductId(product.getId(), paging);
+
+            List<ReviewResponse> reviews = this.reviewService.parseReviews(pagedResult);
+
             ProductResponse productResponse = new ProductResponse(
                     product.getId(),
                     product.getName(),
@@ -136,9 +164,10 @@ public class ProductController {
                     product.getPicture(),
                     product.getDiscount(),
                     product.getPrice(),
-                    new CategoryResponse(product.getCategory().getId(), product.getCategory().getName()));
+                    new CategoryResponse(product.getCategory().getId(), product.getCategory().getName()),
+                    reviews);
 
-            return ResponseEntity.ok(productResponse);
+            return ResponseEntity.ok(new ProductAndReviewsResponse(productResponse, pagedResult.getTotalPages()));
         }
         catch (Exception ex) {
             return ResponseEntity
@@ -273,11 +302,7 @@ public class ProductController {
         }
     }
 
-    private List<ProductResponse> parseProducts(Page<Product> pagedResult) throws Exception {
-        if (!pagedResult.hasContent()) {
-            throw new Exception("This page is empty.");
-        }
-
+    private List<ProductResponse> parseProducts(Page<Product> pagedResult) {
         List<ProductResponse> products = pagedResult
                 .stream().map(pr -> new ProductResponse(
                         pr.getId(),

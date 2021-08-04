@@ -57,7 +57,6 @@ public class AuthController {
 
         Authentication authentication = this.userService.loginUser(authenticationRequest);
 
-
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(item -> item.getAuthority())
@@ -68,6 +67,7 @@ public class AuthController {
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getUser().getId());
 
         return ResponseEntity.ok(new JwtResponse(jwt, refreshToken.getToken(),
+                userDetails.getUser().getId(),
                 userDetails.getUser().getName(),
                 userDetails.getUser().getSurname(),
                 userDetails.getUser().getEmail(),

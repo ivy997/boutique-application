@@ -5,12 +5,13 @@ import boutique.entities.Product;
 import boutique.models.FilterRequest;
 import boutique.repositories.CategoryRepository;
 import boutique.repositories.ProductRepository;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,19 +27,19 @@ public class ProductService {
     public Page<Product> listProductsWithFilters(FilterRequest filter, Pageable paging) throws Exception {
         Page<Product> allProducts = this.productRepository.findAll(paging);
 
-        if (filter.getCategoryId() != null && filter.getProductKeyword() == null) {
+        if (filter.getCategoryId() != null && StringUtils.isEmpty(filter.getProductKeyword())) {
             if (!this.categoryRepository.existsById(filter.getCategoryId())) {
                 throw new Exception("Could not find category with this id.");
             }
 
             return this.filterByCategory(filter.getCategoryId(), paging);
         }
-        else if (filter.getCategoryId() == null && filter.getProductKeyword() != null) {
-            // Search for products by keyword
+        else if (filter.getCategoryId() == null && StringUtils.isNotEmpty(filter.getProductKeyword())) {
+            // Search for products by keywords
             return this.filterByKeyword(allProducts.toList(), filter.getProductKeyword(), paging);
         }
-        else if (filter.getCategoryId() != null && filter.getProductKeyword() != null) {
-            // Search for products by keyword and categoryId
+        else if (filter.getCategoryId() != null && StringUtils.isNotEmpty(filter.getProductKeyword())) {
+            // Search for products by keywords and categoryId
             Page<Product> page = this.filterByCategory(filter.getCategoryId(), paging);
 
             return this.filterByKeyword(page.toList(), filter.getProductKeyword(), paging);
@@ -55,13 +56,18 @@ public class ProductService {
     }
 
     private Page<Product> filterByKeyword(List<Product> products, String keyword, Pageable paging) {
-        List<Product> filteredProducts = products
-                .stream()
-                .filter(x -> x.getName().toLowerCase()
-                        .contains(keyword.toLowerCase()))
-                .collect(Collectors.toList());
+        Set<Product> filteredProducts = new HashSet<>();
+        for(String word : Arrays.stream(keyword.split(" ")).toList()) {
+            List<Product> currProducts = products
+                    .stream()
+                    .filter(x -> x.getName().toLowerCase()
+                            .contains(word.toLowerCase()))
+                    .collect(Collectors.toList());
 
-        Page<Product> pagedResult = new PageImpl<Product>(filteredProducts);
+            filteredProducts.addAll(currProducts);
+        }
+
+        Page<Product> pagedResult = new PageImpl<Product>(filteredProducts.stream().toList());
 
         return pagedResult;
     }

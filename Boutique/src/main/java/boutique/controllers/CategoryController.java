@@ -23,7 +23,6 @@ public class CategoryController {
     }
 
     @GetMapping()
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> listCategories(@RequestParam(required = false, defaultValue = "12") Integer size,
                                             @RequestParam(required = false, defaultValue = "1") Integer page) {
         try
@@ -34,7 +33,13 @@ public class CategoryController {
                     request.getElements(),
                     Sort.by(request.getSortBy()).descending());
 
-            List<CategoryResponse> categories = this.categoryRepository.findAll()
+            Page<Category> pagedResult = this.categoryRepository.findAll(paging);
+
+            if (!pagedResult.hasContent()) {
+                return ResponseEntity.ok(new MessageResponse("This page is empty."));
+            }
+
+            List<CategoryResponse> categories = pagedResult
                     .stream().map(x -> new CategoryResponse(
                             x.getId(),
                             x.getName(),
@@ -46,8 +51,6 @@ public class CategoryController {
                                     pr.getDiscount(),
                                     pr.getPrice())).collect(Collectors.toList())
                     )).collect(Collectors.toList());
-
-            Page<CategoryResponse> pagedResult = new PageImpl<CategoryResponse>(categories);
 
             return ResponseEntity.ok(new ListElementsResponse(categories, pagedResult.getTotalPages()));
         }

@@ -144,13 +144,8 @@ public class ProfileController {
                 user.setEmail(userRequest.getEmail());
             }
 
-            Set<Role> roles = new HashSet<>();
-            if (userRequest.getRoles() == null) {
-                Role userRole = this.roleRepository.findByName(ERole.ROLE_USER)
-                        .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                roles.add(userRole);
-            }
-            else {
+            if (userRequest.getRoles() != null) {
+                Set<Role> roles = new HashSet<>();
                 userRequest.getRoles().forEach(role -> {
                     switch (role) {
                         case "admin":
@@ -165,9 +160,9 @@ public class ProfileController {
                             roles.add(defaultUserRole);
                     }
                 });
-            }
 
-            user.setRoles(roles);
+                user.setRoles(roles);
+            }
 
             this.userRepository.saveAndFlush(user);
 
